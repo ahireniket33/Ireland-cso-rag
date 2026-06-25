@@ -5,7 +5,7 @@ import asyncio
 import os
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from rag import __version__
 from rag.api.schemas import HealthResponse, QueryRequest, QueryResponse
@@ -20,6 +20,12 @@ app = FastAPI(
     version=__version__,
     description="Grounded, cited Q&A over Irish CSO economic & census statistics.",
 )
+
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    """Friendly landing: redirect the root URL to the interactive API docs."""
+    return RedirectResponse(url="/docs")
+
 
 _pipeline: RAGPipeline | None = None
 _cfg = None

@@ -35,3 +35,10 @@ def test_query_off_domain(built_index):
 def test_validation_error(built_index):
     c = _client(built_index)
     assert c.post("/query", json={"question": ""}).status_code == 422
+
+
+def test_root_redirects_to_docs(built_index):
+    c = _client(built_index)
+    r = c.get("/", follow_redirects=False)
+    assert r.status_code in (302, 307)
+    assert r.headers["location"] == "/docs"
