@@ -52,16 +52,15 @@ class ExtractiveGenerator(Generator):
                 if overlap:
                     scored.append((overlap, sent, h))
 
-        top_hit = hits[0]
         if not scored:
-            # fall back to the single most relevant chunk's lead sentence
-            lead = _SENT.split(top_hit.text)[0].strip()
-            answer = lead
-            cite_hit = top_hit
-        else:
-            scored.sort(key=lambda t: t[0], reverse=True)
-            best_score, best_sent, cite_hit = scored[0]
-            answer = best_sent
+            # No retrieved sentence shares any keyword, year, or topic word with
+            # the question -> the context does not actually address it. Refuse
+            # rather than return an unrelated statistic (relevance guard).
+            return GenerationResult(answer="", used_context=False)
+
+        scored.sort(key=lambda t: t[0], reverse=True)
+        best_score, best_sent, cite_hit = scored[0]
+        answer = best_sent
 
         primary = cite_hit.metadata.get('matrix', '?')
         cite = f"[Source: CSO {primary} — {cite_hit.title}]"

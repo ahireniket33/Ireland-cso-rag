@@ -29,3 +29,22 @@ def test_no_citation_when_refused(pipeline):
     r = pipeline.answer("Tell me a joke about cats")
     assert r.refused
     assert r.citations == []
+
+
+def test_extractive_refuses_irrelevant_context():
+    """Off-topic question whose retrieved context doesn't address it -> refuse."""
+    from rag.generation.extractive import ExtractiveGenerator
+    from rag.vectorstore.base import SearchHit
+    g = ExtractiveGenerator()
+    hits = [SearchHit("c1", 0.51,
+                      "Population (Both sexes, All ages) for Ireland was 5,149,139 in 2022.",
+                      {"matrix": "FY001A"}, "Census Population")]
+    assert g.generate("what is the temperature in dublin", hits).used_context is False
+    # but a relevant question over the same context still answers
+    ok = g.generate("what was the population in 2022", hits)
+    assert ok.used_context and "5,149,139" in ok.answer
+
+
+def test_pipeline_refuses_weather_question(pipeline):
+    r = pipeline.answer("What's the temperature in Dublin today?")
+    assert r.refused

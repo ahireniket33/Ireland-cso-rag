@@ -48,3 +48,5 @@
   should_refuse: true
 - question: "Recommend a good movie to watch tonight."
   should_refuse: true
+- question: "What is the temperature in Dublin today?"
+  should_refuse: true
