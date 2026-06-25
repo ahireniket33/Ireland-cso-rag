@@ -28,6 +28,9 @@ def run_eval(cfg: Config, pipeline: RAGPipeline | None = None) -> dict:
     substring_hits = 0
     faithfulness_sum = 0.0
     refusal_correct = 0
+    hit_at_1 = 0
+    hit_at_3 = 0
+    reciprocal_rank_sum = 0.0
     details = []
 
     for g in answerable:
@@ -35,13 +38,22 @@ def run_eval(cfg: Config, pipeline: RAGPipeline | None = None) -> dict:
         cited = {c.matrix for c in r.citations}
         rel = g["expected_matrix"] in cited
         sub = (not r.refused) and (g.get("expect_substring", "") in r.answer)
+
+        # Rank of the first retrieved chunk from the expected dataset (Hit@k/MRR).
+        ranked = pipe.retriever.retrieve(g["question"])
+        rank = next((i + 1 for i, h in enumerate(ranked)
+                     if h.metadata.get("matrix") == g["expected_matrix"]), None)
+        hit_at_1 += int(rank == 1)
+        hit_at_3 += int(rank is not None and rank <= 3)
+        reciprocal_rank_sum += (1.0 / rank) if rank else 0.0
+
         retrieval_hits += int(rel)
         substring_hits += int(sub)
         faithfulness_sum += r.faithfulness
         details.append({
             "q": g["question"], "refused": r.refused, "cited": sorted(cited),
             "expected": g["expected_matrix"], "retrieval_ok": rel,
-            "substring_ok": sub, "faithfulness": r.faithfulness,
+            "rank": rank, "substring_ok": sub, "faithfulness": r.faithfulness,
         })
 
     for g in refusable:
@@ -57,6 +69,9 @@ def run_eval(cfg: Config, pipeline: RAGPipeline | None = None) -> dict:
     answer_accuracy = substring_hits / n_ans
     faithfulness = faithfulness_sum / n_ans
     refusal_rate = refusal_correct / n_ref
+    hit1 = hit_at_1 / n_ans
+    hit3 = hit_at_3 / n_ans
+    mrr = reciprocal_rank_sum / n_ans
 
     rel_min = cfg.get("eval", "retrieval_relevance_min", default=0.6)
     faith_min = cfg.get("eval", "faithfulness_min", default=0.6)
@@ -69,6 +84,9 @@ def run_eval(cfg: Config, pipeline: RAGPipeline | None = None) -> dict:
         "passed": passed,
         "metrics": {
             "retrieval_relevance": round(retrieval_relevance, 3),
+            "hit_at_1": round(hit1, 3),
+            "hit_at_3": round(hit3, 3),
+            "mrr": round(mrr, 3),
             "answer_accuracy": round(answer_accuracy, 3),
             "faithfulness": round(faithfulness, 3),
             "refusal_accuracy": round(refusal_rate, 3),

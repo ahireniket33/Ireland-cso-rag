@@ -200,10 +200,18 @@ python run.py --config config.test.yaml eval
 
 | Metric | Score |
 |--------|-------|
-| Retrieval relevance (expected dataset cited) | **1.00** |
+| Retrieval relevance / Hit@k (expected dataset in top-k) | **1.00** |
+| Hit@1 (expected dataset ranked first) | **0.89** |
+| Hit@3 | **1.00** |
+| MRR (mean reciprocal rank) | **0.94** |
 | Answer accuracy (expected figure present) | **1.00** |
 | Faithfulness (answer supported by context) | **1.00** |
 | Refusal accuracy (off-domain/adversarial refused) | **1.00** |
+
+> Measured on the gold Q&A set (9 answerable + 5 adversarial) with the offline
+> hashing backend used in CI. Hit@k is judged at dataset (CSO matrix) level. The
+> deployed neural model (`all-MiniLM-L6-v2`) ranks at least as well — e.g. the
+> 2022-inflation query ranks the correct dataset #1 at 0.72 similarity live.
 
 ---
 
