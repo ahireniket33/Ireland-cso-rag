@@ -11,6 +11,14 @@ license: mit
 
 # Ireland CSO RAG 🇮🇪
 
+[![Live Demo](https://img.shields.io/badge/%F0%9F%9F%A2_Live_Demo-Hugging_Face_Space-0B0B0C?style=for-the-badge)](https://nikkket-ireland-cso-rag.hf.space)
+&nbsp;
+[![CI](https://github.com/ahireniket33/Ireland-cso-rag/actions/workflows/ci.yml/badge.svg)](https://github.com/ahireniket33/Ireland-cso-rag/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
+
+**🔴 Live demo:** **https://nikkket-ireland-cso-rag.hf.space** &nbsp;·&nbsp; [API docs](https://nikkket-ireland-cso-rag.hf.space/docs) &nbsp;·&nbsp; ask about Irish inflation, population, or unemployment and get a grounded, cited answer.
+
 A production-grade **Retrieval-Augmented Generation** system that answers
 questions about **Irish economic & census statistics** from the
 [Central Statistics Office (CSO)](https://www.cso.ie/), with strict
