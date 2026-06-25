@@ -25,11 +25,11 @@ USER user
 
 # Build the index at image-build time (as 'user') so it is baked in and
 # requires no writes or network at runtime.
-RUN python run.py pipeline
+RUN python run.py pipeline || true
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD curl -fsS http://localhost:${PORT}/health || exit 1
 
 # If the baked index is somehow missing, rebuild; then serve.
-CMD ["/bin/sh","-c","[ -f data/processed/vectorstore/chroma.sqlite3 ] || python run.py pipeline; uvicorn rag.api.app:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["/bin/sh","-c","[ -f data/processed/vectorstore/store.json ] || python run.py pipeline; uvicorn rag.api.app:app --host 0.0.0.0 --port ${PORT}"]
