@@ -1,6 +1,6 @@
 ---
 title: Ireland CSO RAG
-emoji: "🇮🇪"
+emoji: "🍀"
 colorFrom: green
 colorTo: indigo
 sdk: docker
