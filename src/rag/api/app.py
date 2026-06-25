@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import asyncio
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from rag import __version__
 from rag.api.schemas import HealthResponse, QueryRequest, QueryResponse
@@ -22,10 +23,12 @@ app = FastAPI(
 )
 
 @app.get("/", include_in_schema=False)
-async def root() -> RedirectResponse:
-    """Friendly landing: redirect the root URL to the interactive API docs."""
-    return RedirectResponse(url="/docs")
+async def root() -> FileResponse:
+    """Serve the web UI (a dark, glassy front-end that calls /query)."""
+    return FileResponse(_STATIC_DIR / "index.html")
 
+
+_STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 _pipeline: RAGPipeline | None = None
 _cfg = None

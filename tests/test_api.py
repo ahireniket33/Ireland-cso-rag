@@ -37,8 +37,9 @@ def test_validation_error(built_index):
     assert c.post("/query", json={"question": ""}).status_code == 422
 
 
-def test_root_redirects_to_docs(built_index):
+def test_root_serves_web_ui(built_index):
     c = _client(built_index)
-    r = c.get("/", follow_redirects=False)
-    assert r.status_code in (302, 307)
-    assert r.headers["location"] == "/docs"
+    r = c.get("/")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+    assert "Ireland CSO RAG" in r.text
