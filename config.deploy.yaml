@@ -1,5 +1,6 @@
-# Deployment config (Hugging Face Space): neural MiniLM embeddings + Chroma
-# + extractive generator over the bundled, deterministic CSO sample.
+# Deployment config (Hugging Face Space): neural MiniLM embeddings + numpy
+# store + extractive generator over the bundled, deterministic CSO sample.
+# numpy store = trivial, robust file persistence (no DB/permission quirks).
 # No API key and no runtime network needed -> reliable on free tier.
 project:
   name: ireland-cso-rag
@@ -62,7 +63,7 @@ embeddings:
   batch_size: 64
   normalize: true
 vectorstore:
-  backend: chroma
+  backend: numpy
   collection: cso_chunks
   distance: cosine
 retrieval:

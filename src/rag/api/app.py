@@ -36,11 +36,22 @@ def get_pipeline() -> RAGPipeline:
 
 @app.on_event("startup")
 async def _startup() -> None:
-    # Warm up the pipeline so the first request isn't slow.
+    # Warm up the pipeline; if no index is present (e.g. fresh container),
+    # build it in-process so the service is self-healing on first boot.
+    global _pipeline
     try:
-        get_pipeline()
+        p = get_pipeline()
+        if p.store.count() == 0:
+            log.warning("No index found at startup \u2014 building it now...")
+            from rag.indexer import build_index
+            from rag.ingest.pipeline import run_ingest
+            run_ingest(_cfg)
+            build_index(_cfg)
+            _pipeline = None          # force reload with the fresh index
+            get_pipeline()
+            log.info("Startup index build complete.")
     except Exception as exc:  # pragma: no cover
-        log.error("Startup warm-up failed: %s", exc)
+        log.error("Startup index build failed: %s", exc)
 
 
 @app.get("/health", response_model=HealthResponse)
