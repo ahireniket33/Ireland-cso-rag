@@ -1,0 +1,72 @@
+{
+  "class": "dataset",
+  "label": "Census Population",
+  "id": [
+    "STATISTIC",
+    "TLIST(A1)"
+  ],
+  "size": [
+    1,
+    4
+  ],
+  "role": {
+    "metric": [
+      "STATISTIC"
+    ],
+    "time": [
+      "TLIST(A1)"
+    ]
+  },
+  "dimension": {
+    "STATISTIC": {
+      "label": "Statistic",
+      "category": {
+        "index": [
+          "S1"
+        ],
+        "label": {
+          "S1": "Population (Both sexes, All ages)"
+        },
+        "unit": {
+          "S1": {
+            "label": "Number",
+            "decimals": 1
+          }
+        }
+      }
+    },
+    "TLIST(A1)": {
+      "label": "Year",
+      "category": {
+        "index": [
+          "2006",
+          "2011",
+          "2016",
+          "2022"
+        ],
+        "label": {
+          "2006": "2006",
+          "2011": "2011",
+          "2016": "2016",
+          "2022": "2022"
+        }
+      }
+    }
+  },
+  "value": [
+    4239848,
+    4588252,
+    4761865,
+    5149139
+  ],
+  "updated": "2023-05-30T11:00:00.000Z",
+  "href": "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset/FY001A/JSON-stat/2.0/en",
+  "extension": {
+    "matrix": "FY001A",
+    "copyright": {
+      "name": "Central Statistics Office, Ireland",
+      "code": "CSO",
+      "href": "https://www.cso.ie/"
+    }
+  }
+}
