@@ -18,6 +18,10 @@ def _load_doc(cfg: Config, client: CSOClient, matrix: str) -> dict | None:
     """Try live API; on failure fall back to cached raw or bundled sample."""
     raw_dir = cfg.path("raw_dir")
     sample_dir = cfg.path("sample_dir")
+    # Deterministic/offline mode: use only the bundled sample (for tests & CI),
+    # never the live API, so results are reproducible regardless of network.
+    if cfg.get("ingest", "offline", default=False):
+        return load_local(matrix, sample_dir, raw_dir)
     try:
         doc = client.fetch(matrix)
         raw_dir.mkdir(parents=True, exist_ok=True)

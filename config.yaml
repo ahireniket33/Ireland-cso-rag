@@ -41,6 +41,8 @@ paths:
 # --- Data ingestion ----------------------------------------------------------
 ingest:
   source: "cso_pxstat"
+  # offline: true -> use ONLY data/sample (deterministic, no network). Tests use this.
+  offline: false
   base_url: "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset"
   # CSO PxStat matrix codes to ingest (economy + census).
   datasets:

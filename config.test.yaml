@@ -48,6 +48,7 @@ ingest:
   request_timeout_s: 30
   request_retries: 3
   request_backoff_s: 2.0
+  offline: true
 chunk:
   strategy: recursive
   size: 600
