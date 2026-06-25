@@ -1,0 +1,130 @@
+# =============================================================================
+# Ireland CSO RAG — central configuration
+# No secrets here. Secrets come from environment variables (see .env.example).
+# Every magic number lives in this file so behaviour is reproducible.
+# =============================================================================
+
+project:
+  name: "ireland-cso-rag"
+  domain: "Irish economic & census statistics (CSO.ie)"
+  # Queries unrelated to this domain are rejected by the input guardrail.
+  domain_keywords:
+    - ireland
+    - irish
+    - cso
+    - census
+    - population
+    - inflation
+    - cpi
+    - consumer price
+    - unemployment
+    - employment
+    - prices
+    - economy
+    - economic
+    - county
+    - dublin
+    - statistic
+    - rate
+    - index
+    - household
+    - earnings
+    - wages
+
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  sample_dir: "data/sample"
+  chunks_file: "data/processed/chunks.jsonl"
+  vector_dir: "data/processed/vectorstore"
+
+# --- Data ingestion ----------------------------------------------------------
+ingest:
+  source: "cso_pxstat"
+  base_url: "https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset"
+  # CSO PxStat matrix codes to ingest (economy + census).
+  datasets:
+    - code: "CPM01"
+      title: "Consumer Price Index"
+      topic: "prices"
+    - code: "MUM01"
+      title: "Monthly Unemployment"
+      topic: "labour market"
+    - code: "FY001A"
+      title: "Census Population"
+      topic: "census"
+  # Only keep recent observations to keep the corpus focused & relevant.
+  min_year: 2015
+  request_timeout_s: 30
+  request_retries: 3
+  request_backoff_s: 2.0
+
+# --- Chunking ----------------------------------------------------------------
+chunk:
+  strategy: "recursive"        # recursive | sentence
+  size: 600                    # target characters per chunk
+  overlap: 100                 # character overlap between chunks
+  min_chars: 40                # drop chunks shorter than this
+
+# --- Embeddings (swappable) --------------------------------------------------
+embeddings:
+  backend: "sentence_transformers"   # sentence_transformers | hashing
+  model: "sentence-transformers/all-MiniLM-L6-v2"
+  dim: 384                     # used by the hashing backend / sanity checks
+  batch_size: 64
+  normalize: true
+
+# --- Vector store ------------------------------------------------------------
+vectorstore:
+  backend: "chroma"            # chroma | faiss
+  collection: "cso_chunks"
+  distance: "cosine"
+
+# --- Retrieval ---------------------------------------------------------------
+retrieval:
+  top_k: 5
+  # Reject matches below this cosine similarity (anti-hallucination gate).
+  similarity_threshold: 0.30
+  rerank:
+    enabled: false
+    model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    top_n: 5
+
+# --- Generation (swappable) --------------------------------------------------
+generation:
+  backend: "extractive"        # extractive | openai
+  # 'extractive' needs no API key and no cost: it composes a grounded answer
+  # directly from retrieved chunks. 'openai' uses an OpenAI-compatible endpoint.
+  max_context_chunks: 5
+  temperature: 0.0
+  max_tokens: 512
+  openai:
+    model: "gpt-4o-mini"
+    # base_url + api_key are read from env: OPENAI_BASE_URL, OPENAI_API_KEY
+    request_timeout_s: 30
+
+# --- Guardrails --------------------------------------------------------------
+guardrails:
+  refusal_message: "I don't have enough information to answer that from the Irish CSO statistics I have."
+  max_query_chars: 500
+  enable_input_guard: true
+  enable_pii_filter: true
+  enable_output_grounding: true
+  # Min fraction of answer sentences that must be supported by retrieved
+  # context, else unsupported sentences are flagged/suppressed.
+  faithfulness_threshold: 0.5
+
+# --- API ---------------------------------------------------------------------
+api:
+  host: "0.0.0.0"
+  port: 8000
+  request_timeout_s: 60
+
+# --- Eval --------------------------------------------------------------------
+eval:
+  gold_file: "src/rag/eval/gold_qa.yaml"
+  retrieval_relevance_min: 0.6   # min hit-rate to pass
+  faithfulness_min: 0.6
+
+logging:
+  level: "INFO"
