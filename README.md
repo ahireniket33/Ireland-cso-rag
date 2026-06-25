@@ -1,3 +1,14 @@
+---
+title: Ireland CSO RAG
+emoji: "🇮🇪"
+colorFrom: green
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+license: mit
+---
+
 # Ireland CSO RAG 🇮🇪
 
 A production-grade **Retrieval-Augmented Generation** system that answers
