@@ -1,0 +1,21 @@
+services:
+  rag:
+    build: .
+    image: ireland-cso-rag:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - RAG_CONFIG=config.yaml
+      - RAG_LOG_LEVEL=INFO
+      # For an LLM backend, set generation.backend=openai in config.yaml and:
+      # - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+    volumes:
+      - rag_data:/app/data/processed
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+volumes:
+  rag_data:
